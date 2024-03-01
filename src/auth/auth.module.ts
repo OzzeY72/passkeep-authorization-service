@@ -5,9 +5,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { GoogleStrategy } from './openid.google.strategy';
 import { GoogleOAuthGuard } from './openid.google.guard';
+import { ConfigModule } from '@nestjs/config';
+
 
 @Module({
     imports: [
+      ConfigModule.forRoot(),
       UsersModule,
       JwtModule.register({
         global: true,
