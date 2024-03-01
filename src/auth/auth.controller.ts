@@ -5,17 +5,36 @@ import {
     HttpCode,
     HttpStatus,
     Post,
+    Redirect,
     Req,
     Request,
     UseGuards
 } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { GoogleOAuthGuard } from './openid.google.guard';
+import { UsersService } from 'src/users/users.service';
 
 
 @Controller('auth')
 export class AuthController {
-    constructor (private authService : AuthService){}
+    constructor (
+        private authService : AuthService,
+        private usersService: UsersService,
+    ){}
+
+    @UseGuards(GoogleOAuthGuard)
+    @Get('google')
+    async googleGuard(@Request() req){
+        return req.user;
+    }
+
+    @Get('google-redirect')
+    @UseGuards(GoogleOAuthGuard)
+    async googleAuthRedirect(@Request() req) {
+        await this.usersService.addGoogle(req.user);
+        return this.authService.googleLogin(req);
+    }
 
     @HttpCode(HttpStatus.OK)
     @Post('login')

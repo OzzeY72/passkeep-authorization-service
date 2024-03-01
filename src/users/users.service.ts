@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-// This should be a real class/interface representing a user entity
 export type User = 
 {
   userId: number,
@@ -31,4 +30,8 @@ export class UsersService {
   async add(username: string,hashpass: string){
     this.users.push({userId:3,username:username,password:hashpass});
   }
-}   
+  async addGoogle(user){
+    this.users.push({userId:this.users.length+1,username:user.email,password:null});
+    console.log(this.users);
+  }
+}     
