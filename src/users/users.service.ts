@@ -31,7 +31,9 @@ export class UsersService {
     this.users.push({userId:3,username:username,password:hashpass});
   }
   async addGoogle(user){
-    this.users.push({userId:this.users.length+1,username:user.email,password:null});
+    if(!await this.findOne(user.firstName)){
+      this.users.push({userId:this.users.length+1,username:user.firstName,password:null});
+    }
     console.log(this.users);
   }
 }     

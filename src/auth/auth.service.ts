@@ -37,13 +37,19 @@ export class AuthService {
     }
   }
 
-  googleLogin(req){
+  async googleSignIn(user)
+  {
+    const payload = { sub: user.userId, username: user.username };
+    return await this.jwtService.signAsync(payload);
+  }
+
+  async googleLogin(req){
     if(!req.user){
       throw new UnauthorizedException(); 
     }
     else{
       return {
-        message: "Success",
+        access_token: await this.googleSignIn(await this.usersService.findOne(req.user.firstName)),
         user: req.user,
       };
     }
