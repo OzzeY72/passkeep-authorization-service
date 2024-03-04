@@ -2,6 +2,7 @@ import { Injectable, Redirect, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { TokensService } from 'src/tokens/tokens.service';
 
 
 @Injectable()
@@ -9,9 +10,10 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private tokensService: TokensService,
   ) {}
 
-  async signIn(
+  async getToken(
     username: string,
     pass: string,
   ): Promise<{ access_token: string }> {
@@ -19,10 +21,22 @@ export class AuthService {
     if (user?.password == null || !await bcrypt.compare(pass,user?.password)  ) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: user.userId, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+    //const payload = { sub: user.userId, username: user.username };
+    //Here we must send request to db with scopes alllowed
+
+    let token = await this.tokensService.findToken(user.userId);
+    if(token != undefined){
+      return token;
+    }
+    else{
+      token = await this.tokensService.createToken({
+        scope:["read"],
+        exp:Math.floor(Date.now()/1000)+86400,
+        userId:user.userId
+      });
+    }
+
+    return token;
   }
   async signUp(
     username: string,

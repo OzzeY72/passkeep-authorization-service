@@ -18,7 +18,7 @@ export class UsersService {
     },
     {
       userId: 2,
-      username: 'maria',
+      username: 'maria@gmail.com',
       password: '$2b$10$lTIhKBio2TYXa2Z2oZy14OwcM8yvAex.c/xc3QiI7rC1Tvjaez2SC',
       //guess
     },

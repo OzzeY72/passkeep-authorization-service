@@ -3,9 +3,10 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
-import { GoogleStrategy } from './openid.google.strategy';
-import { GoogleOAuthGuard } from './openid.google.guard';
 import { ConfigModule } from '@nestjs/config';
+import { GoogleModule } from './proiders/google/openid.google.module';
+import { TokensService } from 'src/tokens/tokens.service';
+import { TokensModule } from 'src/tokens/tokens.module';
 
 
 @Module({
@@ -17,8 +18,10 @@ import { ConfigModule } from '@nestjs/config';
         secret: process.env.JWT_KEY!,
         signOptions: { expiresIn: '3600s' },
       }),
+      GoogleModule,
+      TokensModule,
     ],
-    providers: [AuthService, GoogleStrategy,GoogleOAuthGuard],
+    providers: [AuthService],
     controllers: [AuthController],
     exports: [AuthService],
   })
