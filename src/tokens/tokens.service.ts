@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { access } from 'fs';
 
-export type Token = 
+export type TokenStruct = 
 {
     access_token: string,
     refresh_token: string,
@@ -55,8 +55,8 @@ export class TokensService {
     
     async createToken(props: {scope: [string],exp: number, userId: number}){
         const token = {
-            access_token: this.generateRandomToken(96),
-            refresh_token: this.generateRandomToken(96),
+            access_token: this.generateRandomToken(64),
+            refresh_token: this.generateRandomToken(64),
             exp:  props.exp,
             scope: props.scope,
             userId: props.userId,
