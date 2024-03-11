@@ -13,7 +13,7 @@ export class AuthService {
     private tokensService: TokensService,
   ) {}
 
-  async getToken(
+  async login(
     username: string,
     pass: string,
   ): Promise<{ access_token: string }> {
@@ -24,7 +24,9 @@ export class AuthService {
     //const payload = { sub: user.userId, username: user.username };
     //Here we must send request to db with scopes alllowed
 
-    let token = await this.tokensService.findToken(user.userId);
+    return this.tokensService.generateJWT({userId:user.userId,username:user.username});
+
+    /*let token = await this.tokensService.findToken(user.userId);
     if(token != undefined){
       return token;
     }
@@ -35,8 +37,8 @@ export class AuthService {
         userId:user.userId
       });
     }
-
-    return token;
+    */
+    
   }
   async signUp(
     username: string,

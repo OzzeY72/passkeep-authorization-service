@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
 
 export type TokenStruct = 
@@ -12,6 +13,9 @@ export type TokenStruct =
 
 @Injectable()
 export class TokensService {
+    constructor(
+        private jwtService: JwtService
+    ){}
     //for now hardcoded token array, db in future
     public tokens = [
         {
@@ -22,6 +26,21 @@ export class TokensService {
             userId: 1,
         },
     ];
+
+    async generateJWT(user:{userId:number,username:string})
+    {
+        const payload = {sub: user.userId,username: user.username};
+        return {access_token: await this.jwtService.signAsync(payload)}
+    }
+
+    async decodeJWT(token: string){
+        return await this.jwtService.verifyAsync(
+            token,
+            {
+              secret: process.env.JWT_KEY
+            }
+        );
+    }
     
     generateRandomToken(length:number){
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

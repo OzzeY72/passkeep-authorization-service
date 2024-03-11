@@ -8,9 +8,14 @@ import {
     RawBodyRequest,
     Redirect,
     Req,
+    Response,
+    Options,
     Request,
-    UseGuards
+    Header,
+    UseGuards,
+    Head
 } from '@nestjs/common';
+import { Response as Res } from 'express';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { GoogleOAuthGuard } from './proiders/google/openid.google.guard';
@@ -38,25 +43,22 @@ export class AuthController {
         await this.usersService.addGoogle(req.user);
         return this.authService.googleLogin(req);
     }
+    
+    @HttpCode(HttpStatus.OK)
+    @Header("Access-Control-Allow-Methods","POST")
+    @Header("Access-Control-Allow-Headers","Content-type")
+    @Header("Access-Control-Allow-Origin","http://127.0.0.1:3000")
+    @Options('login')
+    allow_cors_login(){}
 
     @HttpCode(HttpStatus.OK)
-    @Post('token/generate')
+    @Post('login')
+    @Header("Access-Control-Allow-Origin","http://127.0.0.1:3000")
     signIn(@Body() signInDto: Record<string,any>) {
-        console.log("signInDto");
         console.log(signInDto);
-        return this.authService.getToken(signInDto.username,signInDto.password);
-    }
-
-    @HttpCode(HttpStatus.OK)
-    @Get('token/verify')
-    async verifyToken(@Request() req) {
-        console.log(req.query.access_token);
-        const status = await this.tokensService.verifyToken(req.query.access_token)
-        const response = {
-            status: status ? "Token valid" : "Token invalid",
-            token: status ? await this.tokensService.findTokenByToken(req.query.access_token) : undefined,
-        }
-        return response
+        const token = this.authService.login(signInDto.username,signInDto.password);
+        console.log(token);
+        return token;
     }
 
     @HttpCode(HttpStatus.OK)
