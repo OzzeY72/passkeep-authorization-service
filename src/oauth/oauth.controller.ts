@@ -55,18 +55,20 @@ export class OauthController {
     @Header("Access-Control-Allow-Methods","GET")
     @Header("Access-Control-Allow-Headers","Authorization")
     @Header("Access-Control-Allow-Origin","http://127.0.0.1:3002")
-    @Options('authorize')
+    @Options('access_token')
     access_token_cors(){}
 
     @Header("Access-Control-Allow-Origin","http://127.0.0.1:3002")
+    @Header("Content-Type","application/json")
     @HttpCode(HttpStatus.OK)
     @Get('access_token')
-    async access_token(@Query() query: Record<string,any>,@Response() res){
+    async access_token(@Query() query: Record<string,any>){
         if(query.grant_type == 'access_token')
         {
             const token = await this.OauthService.access_token(query);
-            //return token;
-            res.redirect(token.url);
+            console.log(token)
+            return JSON.stringify(token);
+            //res.redirect(token.url);
         }
         else
         {
@@ -75,6 +77,7 @@ export class OauthController {
     }
 
     @HttpCode(HttpStatus.OK)
+    //TODO Guard
     @Get('token/verify')
     async verifyToken(@Request() req) {
         console.log(req.query.access_token);
