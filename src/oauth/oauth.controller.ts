@@ -66,7 +66,7 @@ export class OauthController {
         if(query.grant_type == 'access_token')
         {
             const token = await this.OauthService.access_token(query);
-            console.log(token)
+            console.log(token);
             return JSON.stringify(token);
             //res.redirect(token.url);
         }
@@ -82,9 +82,10 @@ export class OauthController {
     async verifyToken(@Request() req) {
         console.log(req.query.access_token);
         const status = await this.tokensService.verifyToken(req.query.access_token)
+        console.log(status)
         const response = {
             status: status ? "Token valid" : "Token invalid",
-            token: status ? await this.tokensService.findTokenByToken(req.query.access_token) : undefined,
+            token: status ? req.query.access_token : undefined,
         }
         return response
     }

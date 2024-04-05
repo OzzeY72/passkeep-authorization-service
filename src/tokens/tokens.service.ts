@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
 
@@ -17,7 +17,7 @@ export class TokensService {
         private jwtService: JwtService
     ){}
     //for now hardcoded token array, db in future
-    public tokens = [
+    /*public tokens = [
         {
             access_token:"urJ1WAAhSLpAcf1UFkgexCAu7QJoqLdEv0Mi4OTIXxOum9qzOCfQyK1OGV2U0sAr5S0I3ZmPReGRBY4MjUdSdl28Dp6VyQjWwhzKBRIyT8c2zqLGiJO8QZuvftjWWYST",
             refresh_token: "J6XUwqw3Uhvc4zQz4896tZcbELKhPtF9bRreWEaAOA0h8PJCBAksBpvUhSZO4vD4VYVkLx8YwlvUw6087GEsOzLltSM2cd30w5yjI7dIPMvqVhGSqcUCcWzWVeJlbV06",
@@ -25,21 +25,29 @@ export class TokensService {
             scope:["read","write"],
             userId: 1,
         },
-    ];
+    ];*/
 
-    async generateJWT(user:{userId:number,username:string})
+    //user:{userId:number,username:string}
+    async generateJWT(payload : any)
     {
-        const payload = {sub: user.userId,username: user.username};
+        //const payload = {sub: user.userId,username: user.username};
         return {access_token: await this.jwtService.signAsync(payload)}
     }
 
     async decodeJWT(token: string){
-        return await this.jwtService.verifyAsync(
-            token,
-            {
-              secret: process.env.JWT_KEY
-            }
-        );
+        let payload
+        try{
+            payload =  await this.jwtService.verifyAsync(
+                token,
+                {
+                secret: process.env.JWT_KEY
+                }
+            );
+        }
+        catch{
+            return undefined
+        }
+        return payload
     }
     
     generateRandomToken(length:number){
@@ -50,39 +58,38 @@ export class TokensService {
         }
         return token;
     }
-
+    /*
     async findToken(userId:number){
         return this.tokens.find(token => token.userId === userId);
     }
 
     async findTokenByToken(access_token:string){
         return this.tokens.find(token => token.access_token === access_token);
+    }*/
+
+    async verifyToken(token:string)
+    {
+        if (await this.decodeJWT(token) != undefined)
+            return true
+        else
+            return false
     }
 
-    async verifyToken(access_token:string)
+    async generateAccessToken(props: {scope: [string],iat:number, userId: number, aud:[string]})
     {
-        let token = await this.findTokenByToken(access_token);
-        if(token != undefined && token.exp >= Math.floor(Date.now()/1000))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        const payload = {
+            "iss": process.env.ISS,
+            "sub": props.userId,
+            "aud": props.aud,
+            "iat": props.iat,
+            "scope": props.scope
+        };
+
+        return await this.generateJWT(payload);
     }
     
-    async createToken(props: {scope: [string],exp: number, userId: number}){
-        const token = {
-            access_token: this.generateRandomToken(64),
-            refresh_token: this.generateRandomToken(64),
-            exp:  props.exp,
-            scope: props.scope,
-            userId: props.userId,
-        }
-
-        this.tokens.push(token);
-        console.log(this.tokens);
-        return token;
+    async createToken(props: {scope: [string],iat:number, userId: number, aud:[string]})
+    {
+        return await this.generateAccessToken(props);
     }
 }

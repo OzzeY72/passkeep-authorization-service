@@ -74,7 +74,7 @@ export class OauthService {
                     {
                         //TODO
                         //oauthClient.valid_codes.splice(oauthClient.valid_codes.indexOf(code),1);
-                        const token = await this.tokensService.createToken({scope:["write"],exp:Math.floor(Date.now()/1000)+86400,userId:1});
+                        const token = await this.tokensService.createToken({scope:["write"],userId:1,aud:["http://localhost/picture"],iat:Math.floor(Date.now())});
                         return token;
                         //return {url: `${params.redirect_uri}?access_token=${token.access_token}&refresh_token=${token.refresh_token}&exp=${token.exp}&scope=${token.scope}`};
                     }
